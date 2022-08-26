@@ -16,7 +16,7 @@ ezmd = {
         RoomCounter = true,
         ReturnResetCharacterButton = true,
         DeathTrolls=false,
-        Troll_DisableDrawers=true,
+        Troll_DisableDrawers=false,
     },
     b2eng = function(v) return v and "on" or "off" end,
     log = function(txt)
@@ -105,11 +105,14 @@ ezmd = {
         rconsoleprint("\n\n Choose a setting to change: ")
         local num = rconsoleinput()
         local v = indTable[tonumber(num)]
-        
-        ezmd.configs[v] = not ezmd.configs[v]
-        ezmd.log(v.." is now "..ezmd.b2eng(ezmd.configs[v]))
-        
-        writefile("ezmd_cfg.json",ezmd.encode(ezmd.configs))
+        if (v) then
+            ezmd.configs[v] = not ezmd.configs[v]
+            ezmd.log(v.." is now "..ezmd.b2eng(ezmd.configs[v]))
+            
+            writefile("ezmd_cfg.json",ezmd.encode(ezmd.configs))
+        else
+            ezmd.settings()
+        end
     end,
     load_configs = function()
         if (isfile("ezmd_cfg.json")) then
