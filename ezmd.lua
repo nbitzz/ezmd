@@ -8,6 +8,7 @@ local ezmd = {
         SkipScreech = false,
     },
     b2eng = function(v) return v and "on" or "off" end,
+    owner = game:GetService("Players").LocalPlayer
 }
 
 function ezmd.reinject_on_rejoin()
@@ -42,9 +43,12 @@ if (game.PlaceId == 6839171747) then
     rconsoleprint(" EZMD is loading...")
     rconsoleprint("@@DARK_GRAY@@")
     
-    ezmd.log("Waiting for game to load...")
+    ezmd.log("Waiting for player to load...")
     if (not game:IsLoaded()) then
         game.Loaded:Wait()
+    end
+    if (not ezmd.owner.Character) then
+        ezmd.owner.CharacterAdded:Wait()
     end
     
     -- loading procedure
