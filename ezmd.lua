@@ -8,11 +8,6 @@ ezmd = {
     cleanupOnRoomPass = {},
     configs = {
         ShowKeyLocation=true,
-        ShowGoldLocation=false,
-        ShowLockpickLocation=false,
-        ShowLighterLocation=false,
-        ShowFlashlightLocation=false,
-        ShowBatteryLocation=false,
         ShowBookLocationInLibrary=true,
         DisableScreech = true,
         RoomCounter = true,
@@ -40,7 +35,7 @@ ezmd = {
         local LookingFor = {}
         
         -- code here sucks
-        
+        --[[
         if (ezmd.configs.ShowGoldLocation) then
             table.insert(LookingFor,"GoldPile")
         end
@@ -56,11 +51,13 @@ ezmd = {
         if (ezmd.configs.ShowBatteryLocation) then
             table.insert(LookingFor,"Battery")
         end
-        
+        ]]
         for x,v in pairs(currentRoom.Assets:GetDescendants()) do
+            --[[
             if v.Parent.Name == "DrawerContainer" and table.find(LookingFor,v.Name) then
                 table.insert(loot,v)         
             end
+            ]]
             if (v.Name == "KeyObtain" and ezmd.configs.ShowKeyLocation) then
                 table.insert(loot,v)
             end
@@ -237,7 +234,7 @@ if (game.PlaceId == 6839171747) then
         
         -- disable screech
             
-        if ezmd.DisableScreech then
+        if ezmd.configs.DisableScreech then
             local screech = ezmd.bricks:WaitForChild("Screech")
             rconsoleprint("@@LIGHT_GRAY@@")
             ezmd.log("Disabling Screech...")
@@ -270,15 +267,19 @@ if (game.PlaceId == 6839171747) then
         
         -- on room changed
         
-        ezmd.stats.Knobs["Rooms Survived"].Changed:Connect(function(v) 
-            for x,v in pairs(ezmd.cleanupOnRoomPass) do
-                if (v) then
-                    v:Destroy()                    
+        task.spawn(function()
+            ezmd.stats.Knobs:WaitForChild("Rooms Survived").Changed:Connect(function(v) 
+                for x,v in pairs(ezmd.cleanupOnRoomPass) do
+                    if (v) then
+                        v:Destroy()                    
+                    end
                 end
-            end
-            ezmd.cleanupOnRoomPass = {}
-            
-            ezmd.HighlightLoot()
+                ezmd.cleanupOnRoomPass = {}
+                
+                if (v == 50) then
+                    ezmd.LibraryHighlight()                
+                end
+            end)
         end)
         
         ezmd.log("Loot highlighter ready.")
