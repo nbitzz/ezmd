@@ -268,6 +268,21 @@ if (game.PlaceId == 6839171747) then
             ezmd.log("  [!] Screech has been disabled.")
         end
         
+        -- on room changed
+        
+        ezmd.stats.Knobs["Rooms Survived"].Changed:Connect(function(v) 
+            for x,v in pairs(ezmd.cleanupOnRoomPass) do
+                if (v) then
+                    v:Destroy()                    
+                end
+            end
+            ezmd.cleanupOnRoomPass = {}
+            
+            ezmd.HighlightLoot()
+        end)
+        
+        ezmd.log("Loot highlighter ready.")
+        
         -- reinject
         
         ezmd.reinject_on_rejoin()
