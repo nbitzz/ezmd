@@ -169,11 +169,11 @@ if (game.PlaceId == 6839171747) then
     rconsoleprint("@@LIGHT_GRAY@@")
     ezmd.log("------- [ Loading.... ] --------")
     rconsoleprint("@@DARK_GRAY@@")
-    
     ezmd.log("Waiting for player to load...")
     if (not game:IsLoaded()) then
         game.Loaded:Wait()
     end
+    ezmd.owner = game:GetService("Players").LocalPlayer
     if (not ezmd.owner.Character) then
         ezmd.owner.CharacterAdded:Wait()
     end
