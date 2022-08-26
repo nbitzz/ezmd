@@ -15,9 +15,14 @@ ezmd = {
         DisableScreech = true,
         RoomCounter = true,
         ReturnResetCharacterButton = true,
+        HighlightDoors=true,
+        SpeedBoost=false,
+        --[[
         DeathTrolls=false,
         Troll_DisableDrawers=false,
+        ]]
     },
+    justBoosted = false,
     b2eng = function(v) return v and "on" or "off" end,
     log = function(txt)
         rconsoleprint("\n "..txt)
@@ -142,18 +147,18 @@ ezmd = {
             rconsoleprint(ezmd.b2eng(v))
             rconsoleprint("@@DARK_GRAY@@")
         end
-    end,
+    end--[[,
     disable_drawer = function(drawer)
 		local prox = drawer:FindFirstChild("Knobs"):FindFirstChild("ActionEventPrompt")
 		drawer.PrimaryPart.Changed:Connect(function(v) 
 			if v == "Position" then
 				ezmd.owner.Character:PivotTo(drawer.PrimaryPart.CFrame)
-				task.delay(0.1,function() 
+				task.delay(0.5,function() 
 					fireproximityprompt(prox)
 				end)
 			end
 		end)
-    end
+    end]]
 }
 
 function ezmd.reinject_on_rejoin()
@@ -331,6 +336,18 @@ if (game.PlaceId == 6839171747) then
             ezmd.log("Restored reset character button.")            
         end
         
+        ezmd.owner.Character:WaitForChild("Humanoid").Changed:Connect(function(v) 
+            if (ezmd.justBoosted) then
+                ezmd.justBoosted = false
+                return
+            end
+            if (v == "WalkSpeed" and ezmd.configs.SpeedBoost) then
+                ezmd.justBoosted = true
+                ezmd.owner.Character:WaitForChild("Humanoid").WalkSpeed = ezmd.owner.Character:WaitForChild("Humanoid").WalkSpeed + 8
+            end
+        end)
+        
+        --[[
         if (ezmd.configs.DeathTrolls) then
             ezmd.log("Warning: DeathTrolls is enabled - revives are no longer available")
             ezmd.handler.Parent.Parent.HodlerRevive.Visible = false
@@ -357,8 +374,10 @@ if (game.PlaceId == 6839171747) then
                         end
                     end
                     
-                    for x,v in pairs(workspace.CurrentRooms) do
-                        disableDrawersInRoom(v)                        
+                    for x,v in pairs(workspace.CurrentRooms:GetChildren()) do
+                        if v:FindFirstChild("Assets") then
+                            disableDrawersInRoom(v)
+                        end
                     end
                     
                     workspace.CurrentRooms.ChildAdded:Connect(function(c) 
@@ -370,6 +389,7 @@ if (game.PlaceId == 6839171747) then
                 end
             end)
         end
+        ]]
         
         -- reinject
         
