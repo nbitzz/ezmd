@@ -8,6 +8,9 @@ ezmd = {
     cleanupOnRoomPass = {},
     configs = {
         ShowKeyLocation=true,
+        ShowLeverLocation=true,
+        RemoveGate=false,
+        RemoveBookshelvesFromGateRoom=false,
         ShowBookLocationInLibrary=true,
         DisableScreech = true,
         RoomCounter = true,
@@ -59,6 +62,10 @@ ezmd = {
             end
             ]]
             if (v.Name == "KeyObtain" and ezmd.configs.ShowKeyLocation) then
+                table.insert(loot,v)
+            end
+            
+            if (v.Name == "LeverForGate" and ezmd.configs.ShowLeverLocation) then
                 table.insert(loot,v)
             end
         end
@@ -276,8 +283,26 @@ if (game.PlaceId == 6839171747) then
                 end
                 ezmd.cleanupOnRoomPass = {}
                 
+                ezmd.HighlightLoot()
                 if (v == 50) then
                     ezmd.LibraryHighlight()                
+                end
+                
+                local currentRoom = workspace.CurrentRooms[ezmd.gamedata.LatestRoom.Value]
+                
+                if (currentRoom:FindFirstChild("Gate")) then
+                    -- room is a gate room
+                    if ezmd.configs.RemoveGate then
+                        currentRoom.Gate:Destroy()                        
+                    end
+                    
+                    if (ezmd.configs.RemoveBookshelvesFromGateRoom) then
+                        for x,v in pairs(currentRoom:GetChildren()) do
+                            if v.Name == "Modular_Bookshelf" then
+                                v:Destroy()                                
+                            end
+                        end
+                    end
                 end
             end)
         end)
