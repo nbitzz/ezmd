@@ -162,7 +162,10 @@ ezmd = {
 }
 
 function ezmd.reinject_on_rejoin()
-    local ezmd_me = game:HttpGet("https://raw.githubusercontent.com/nbitzz/ezmd/main/ezmd.lua")
+    local ezmd_me = syn.request({
+    Url = "https://raw.githubusercontent.com/nbitzz/ezmd/main/ezmd.lua",
+    Method = "GET"
+}).Body
     syn.queue_on_teleport(ezmd_me)
     ezmd.log("Queued EZMD to run on teleport.")    
 end
