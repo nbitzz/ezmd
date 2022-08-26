@@ -11,6 +11,8 @@ local ezmd = {
 }
 
 function ezmd.reinject_on_rejoin()
+    local ezmd = game:HttpGet("https://raw.githubusercontent.com/nbitzz/ezmd/main/ezmd.lua")
+    syn.queue_on_teleport(ezmd)
     ezmd.log("Queued EZMD to run on teleport.")    
 end
 
@@ -40,8 +42,15 @@ if (game.PlaceId == 6839171747) then
     rconsoleprint(" EZMD is loading...")
     rconsoleprint("@@DARK_GRAY@@")
     
+    ezmd.log("Waiting for game to load...")
+    if (not game:IsLoaded()) then
+        game.Loaded:Wait()
+    end
+    
     -- loading procedure
-    do
+    do 
+        -- get game version
+        
         local logHistory = game:GetService("LogService"):GetLogHistory()
         for x,v in pairs(logHistory) do
             if (v.message:sub(1,7) == "PATCH: ") then
@@ -49,6 +58,12 @@ if (game.PlaceId == 6839171747) then
             end
         end
         ezmd.log("Game version: "..ezmd.game_patch)  
+        
+        -- hooks
+        
+        ezmd.log("Making hooks...")
+        
+        -- reinject
         
         ezmd.reinject_on_rejoin()
     end
