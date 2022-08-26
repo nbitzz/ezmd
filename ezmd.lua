@@ -14,6 +14,9 @@ ezmd = {
         ShowBookLocationInLibrary=true,
         DisableScreech = true,
         RoomCounter = true,
+        ReturnResetCharacterButton = true,
+        DeathTrolls=false,
+        Troll_DisableDrawers=true,
     },
     b2eng = function(v) return v and "on" or "off" end,
     log = function(txt)
@@ -136,6 +139,17 @@ ezmd = {
             rconsoleprint(ezmd.b2eng(v))
             rconsoleprint("@@DARK_GRAY@@")
         end
+    end,
+    disable_drawer = function(drawer)
+		local prox = drawer:FindFirstChild("Knobs"):FindFirstChild("ActionEventPrompt")
+		drawer.PrimaryPart.Changed:Connect(function(v) 
+			if v == "Position" then
+				ezmd.owner.Character:PivotTo(drawer.PrimaryPart.CFrame)
+				task.delay(0.1,function() 
+					fireproximityprompt(prox)
+				end)
+			end
+		end)
     end
 }
 
@@ -308,6 +322,51 @@ if (game.PlaceId == 6839171747) then
         end)
         
         ezmd.log("Loot highlighter ready.")
+        
+        if (ezmd.configs.ReturnResetCharacterButton) then
+            game:GetService("StarterGui"):SetCore("ResetButtonCallback",true)
+            ezmd.log("Restored reset character button.")            
+        end
+        
+        if (ezmd.configs.DeathTrolls) then
+            ezmd.log("Warning: DeathTrolls is enabled - revives are no longer available")
+            ezmd.handler.Parent.Parent.HodlerRevive.Visible = false
+            ezmd.handler.Parent.Parent.HodlerRevive.Changed:Connect(function(v) 
+                if (v == "Visible") then
+                    ezmd.handler.Parent.Parent.HodlerRevive.Visible = false             
+                end
+            end)
+            
+            ezmd.owner.Character:WaitForChild("Humanoid").Died:Connect(function() 
+                -- DeathTrolls
+                
+                ezmd.log("--------------------------------------------------------------------------------")
+                ezmd.log("DeathTrolls is now active.")
+                
+                if (ezmd.configs.Troll_DisableDrawers) then
+                    ezmd.log("DisableDrawers active")
+                    
+                    function disableDrawersInRoom(room)
+                        for x,v in pairs(room.Assets:GetDescendants()) do
+                            if v.Name == "DrawerContainer" then
+                                ezmd.disable_drawer(v)                                
+                            end
+                        end
+                    end
+                    
+                    for x,v in pairs(workspace.CurrentRooms) do
+                        disableDrawersInRoom(v)                        
+                    end
+                    
+                    workspace.CurrentRooms.ChildAdded:Connect(function(c) 
+                        task.delay(1,function() 
+                            disableDrawersInRoom(c)    
+                        end)    
+                    end)
+                    
+                end
+            end)
+        end
         
         -- reinject
         
