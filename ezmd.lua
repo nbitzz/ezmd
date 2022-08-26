@@ -35,6 +35,8 @@ ezmd = {
             for x,v in pairs(room50.Assets:GetChildren()) do
         		if v:FindFirstChild("LiveHintBook") then
         			local highlight = Instance.new("Highlight",v.LiveHintBook)
+                    highlight.FillColor = Color3.new(0.5,0.5,0.5)
+                    table.insert(ezmd.cleanupOnRoomPass,highlight)
         		end
             end
         end
@@ -315,6 +317,12 @@ if (game.PlaceId == 6839171747) then
                 
                 local currentRoom = workspace.CurrentRooms[ezmd.gamedata.LatestRoom.Value]
                 
+                if ezmd.configs.HighlightDoors and currentRoom:FindFirstChild("Door") then
+                    local highlight = Instance.new("Highlight",currentRoom.Door)
+                    highlight.FillColor = Color3.new(0.5,0.5,0.5)
+                    table.insert(ezmd.cleanupOnRoomPass,highlight)
+                end
+                
                 if (currentRoom:FindFirstChild("Gate")) then
                     -- room is a gate room
                     if ezmd.configs.RemoveGate then
@@ -322,7 +330,7 @@ if (game.PlaceId == 6839171747) then
                     end
                     
                     if (ezmd.configs.RemoveBookshelvesFromGateRoom) then
-                        for x,v in pairs(currentRoom:GetChildren()) do
+                        for x,v in pairs(currentRoom.Assets:GetChildren()) do
                             if v.Name == "Modular_Bookshelf" then
                                 v:Destroy()                                
                             end
