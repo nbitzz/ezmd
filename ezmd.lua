@@ -1,7 +1,7 @@
 rconsolename("ezmd, @split#1337")
 
 local ezmd = {
-    game_patch = tostring(game.PlaceVersion),
+    game_patch = game.PlaceVersion,
     decode = function(v) return game:GetService("HttpService"):JSONDecode(v) end,
     encode = function(v) return game:GetService("HttpService"):JSONEncode(v) end,
     configs = {
@@ -51,16 +51,25 @@ if (game.PlaceId == 6839171747) then
         ezmd.owner.CharacterAdded:Wait()
     end
     
+    local logHistory = game:GetService("LogService"):GetLogHistory()
+    for x,v in pairs(logHistory) do
+        if (v.message:sub(1,7) == "PATCH: ") then
+            ezmd.game_patch = v.message:sub(8,v.message:len())            
+        end
+    end
+    
+    if (typeof(ezmd.game_patch) == "number") then
+        game:GetService("LogService").MessageOut:Connect(function(msg) 
+            if (msg:sub(1,7) == "PATCH: ") then
+                ezmd.game_patch = msg:sub(8,msg:len())            
+            end
+        end)
+        
+        repeat task.wait() until (typeof(ezmd.game_patch) == "number")
+    end
+    
     -- loading procedure
     do 
-        -- get game version
-        
-        local logHistory = game:GetService("LogService"):GetLogHistory()
-        for x,v in pairs(logHistory) do
-            if (v.message:sub(1,7) == "PATCH: ") then
-                ezmd.game_patch = v.message:sub(8,v.message:len())            
-            end
-        end
         ezmd.log("Game version: "..ezmd.game_patch)  
         
         -- hooks
