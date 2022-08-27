@@ -30,6 +30,8 @@ ezmd = {
         MultiSkipIfDoorLocked=false,
         HideKey=false,
         SkipRoom100Minigame=false,
+        RemoveElectricalDoor=true,
+        CatchUpKey=true,
         --[[
         DeathTrolls=false,
         Troll_DisableDrawers=false,
@@ -367,6 +369,34 @@ if (game.PlaceId == 6839171747) then
             ezmd.log("  [!] Screech has been disabled.")
         end
         
+        if ezmd.configs.SkipRoom100Minigame then
+            -- TODO: make this ONLY disable the room 100 minigame.
+            
+            local screech = ezmd.bricks:WaitForChild("EngageMinigame")
+            rconsoleprint("@@LIGHT_GRAY@@")
+            ezmd.log("Disabling minigames...")
+            rconsoleprint("@@DARK_GRAY@@")
+            local oldIndex
+            oldIndex = hookmetamethod(screech,"__index",function(_self,key) 
+                if not checkcaller() and _self == screech and key == "OnClientEvent" then
+                    return Instance.new("BindableEvent").Event
+                end
+                
+                return oldIndex(_self,key)
+            end)
+            ezmd.log("  [.] Disabled new event connections.")
+            local conns = getconnections(screech.OnClientEvent)
+            for x,v in pairs(conns) do
+                v:Disable()
+            end
+            ezmd.log("  [.] Disabled current connections ("..#conns..")")
+            screech.OnClientEvent:Connect(function() 
+                screech:FireServer(true)
+            end)
+            ezmd.log("  [.] Reconnected event.")
+            ezmd.log("  [!] Minigames have been disabled. The Room 100 minigame skip can now be performed.")
+        end
+        
         -- on room changed
         
         task.spawn(function()
@@ -382,9 +412,27 @@ if (game.PlaceId == 6839171747) then
                 if (v == 50) then
                     ezmd.LibraryHighlight()    
                 end
-                if (v == 100 and ezmd.configs.SkipRoom100Minigame) then
-                    ezmd.bricks.EBF:FireServer()
-                    game:GetService("StarterGui"):SetCore("ChatMakeSystemMessage",{Text="Room 100 minigame skipped.",Color = Color3.new(1,1,0.2)})
+                if (v == 100) then
+                    if (ezmd.configs.RemoveElectricalDoor) then
+                        currentRoom.ElectricalDoor:Destroy()
+                    elseif ezmd.configs.ShowKeyLocation then
+                        -- ElectricalKeyObtain is key name.
+                        local highlight = Instance.new("Highlight"--[[,currentRoom.ElectricalKeyObtain]])
+                        highlight.FillColor = Color3.new(0.5,0.5,0.5)
+                        table.insert(ezmd.cleanupOnRoomPass,highlight)
+                    end
+                    
+                    if (ezmd.configs.SkipRoom100Minigame) then
+                        game:GetService("StarterGui"):SetCore("ChatMakeSystemMessage",{Text="Skip ready. Interact with the breaker to complete the skip.",Color = Color3.new(1,0.2,0.2)})
+                        local hcon
+                        hcon = currrentRoom.ElevatorBreaker.ActivateEventPrompt.Triggered:Connect(function() 
+                            hcon:Disconnect() 
+                            task.delay(0.5,function()
+                                ezmd.bricks.EBF:FireServer()
+                                game:GetService("StarterGui"):SetCore("ChatMakeSystemMessage",{Text="Room 100 minigame skipped.",Color = Color3.new(1,0.2,0.2)})
+                            end)
+                        end)
+                    end
                 end
                 
                 local currentRoom = workspace.CurrentRooms[ezmd.gamedata.LatestRoom.Value]
@@ -498,6 +546,32 @@ if (game.PlaceId == 6839171747) then
                     ezmd.HideInNearestCloset()                    
                 end
         
+            end)
+            rconsoleprint("@@DARK_GRAY@@")
+        end
+        
+        if (ezmd.configs.CatchUpKey) then
+            rconsoleprint("@@LIGHT_RED@@")
+            ezmd.log("Catch up key is active. Press C to teleport to the player in the latest room.")
+            game:GetService("UserInputService").InputBegan:Connect(function(kc) 
+                
+                if kc.KeyCode == Enum.KeyCode.C and not game:GetService("UserInputService"):GetFocusedTextBox() then
+                    local latestPlayer = nil
+                    for x,v in pairs(game:GetService("Players"):GetChildren()) do
+                        if (v.Character and v:GetAttribute("Alive") and v ~= ezmd.owner) then
+                            if (latestPlayer) then
+                                if (v:GetAttribute("CurrentRoom") > latestPlayer:GetAttribute("CurrentRoom")) then
+                                    latestPlayer = v                                    
+                                end
+                            else
+                                latestPlayer = v
+                            end
+                        end
+                    end
+                end
+                
+                ezmd.owner.Character:PivotTo(v.Character.PrimaryPart.CFrame)
+                
             end)
             rconsoleprint("@@DARK_GRAY@@")
         end
