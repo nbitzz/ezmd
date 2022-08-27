@@ -213,7 +213,7 @@ ezmd = {
         -- hide!
         
         ezmd.owner.Character:PivotTo(nearestHideable.PrimaryPart.CFrame)
-        task.delay(0.1, function()
+        task.delay(0.15, function()
             fireproximityprompt(nearestHideable:FindFirstChild("HidePrompt"))
         end)
     end
