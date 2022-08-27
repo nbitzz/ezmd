@@ -370,7 +370,7 @@ if (game.PlaceId == 6839171747) then
         -- on room changed
         
         task.spawn(function()
-            ezmd.stats.Knobs:WaitForChild("Rooms Survived").Changed:Connect(function(v) 
+            --[[ezmd.stats.Knobs:WaitForChild("Rooms Survived")]]ezmd.gamedata.LatestRoom.Changed:Connect(function(v) 
                 for x,v in pairs(ezmd.cleanupOnRoomPass) do
                     if (v) then
                         v:Destroy()                    
