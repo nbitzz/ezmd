@@ -27,7 +27,8 @@ ezmd = {
         SpeedBoost=false,
         RoomSkipKey=false,
         MultiSkipIfDoorLocked=false,
-        HideKey=false
+        HideKey=false,
+        SkipRoom100Minigame=false,
         --[[
         DeathTrolls=false,
         Troll_DisableDrawers=false,
@@ -378,7 +379,11 @@ if (game.PlaceId == 6839171747) then
                 
                 ezmd.HighlightLoot()
                 if (v == 50) then
-                    ezmd.LibraryHighlight()                
+                    ezmd.LibraryHighlight()    
+                end
+                if (v == 100 and ezmd.configs.SkipRoom100Minigame) then
+                    ezmd.bricks.EBF:FireServer()
+                    game:GetService("StarterGui"):SetCore("ChatMakeSystemMessage",{Text="Room 100 minigame skipped.",Color = Color3.new(1,1,0.2)})
                 end
                 
                 local currentRoom = workspace.CurrentRooms[ezmd.gamedata.LatestRoom.Value]
