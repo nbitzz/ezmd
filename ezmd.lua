@@ -426,7 +426,7 @@ if (game.PlaceId == 6839171747) then
             end
             if (v == "WalkSpeed" and ezmd.configs.SpeedBoost) then
                 ezmd.justBoosted = true
-                ezmd.owner.Character:WaitForChild("Humanoid").WalkSpeed = ezmd.owner.Character:WaitForChild("Humanoid").WalkSpeed + 8/(ezmd.configs.SubtleSpeedBoost and 2 or 1)
+                ezmd.owner.Character:WaitForChild("Humanoid").WalkSpeed = ezmd.owner.Character:WaitForChild("Humanoid").WalkSpeed + (8/(ezmd.configs.SubtleSpeedBoost and 2 or 1))
             end
         end)
         
