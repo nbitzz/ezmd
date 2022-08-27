@@ -391,7 +391,7 @@ if (game.PlaceId == 6839171747) then
             end
             ezmd.log("  [.] Disabled current connections ("..#conns..")")
             screech.OnClientEvent:Connect(function() 
-                screech:FireServer(true)
+                ezmd.bricks.EBF:FireServer()
             end)
             ezmd.log("  [.] Reconnected event.")
             ezmd.log("  [!] Minigames have been disabled. The Room 100 minigame skip can now be performed.")
@@ -424,14 +424,14 @@ if (game.PlaceId == 6839171747) then
                     
                     if (ezmd.configs.SkipRoom100Minigame) then
                         game:GetService("StarterGui"):SetCore("ChatMakeSystemMessage",{Text="Skip ready. Interact with the breaker to complete the skip.",Color = Color3.new(1,0.2,0.2)})
-                        local hcon
+                        --[[local hcon
                         hcon = currrentRoom.ElevatorBreaker.ActivateEventPrompt.Triggered:Connect(function() 
                             hcon:Disconnect() 
                             task.delay(0.5,function()
                                 ezmd.bricks.EBF:FireServer()
                                 game:GetService("StarterGui"):SetCore("ChatMakeSystemMessage",{Text="Room 100 minigame skipped.",Color = Color3.new(1,0.2,0.2)})
                             end)
-                        end)
+                        end)]]
                     end
                 end
                 
@@ -551,11 +551,11 @@ if (game.PlaceId == 6839171747) then
         end
         
         if (ezmd.configs.CatchUpKey) then
-            rconsoleprint("@@LIGHT_RED@@")
-            ezmd.log("Catch up key is active. Press C to teleport to the player in the latest room.")
+            rconsoleprint("@@LIGHT_GREEN@@")
+            ezmd.log("Catch up key is active. Press G to teleport to the player in the latest room.")
             game:GetService("UserInputService").InputBegan:Connect(function(kc) 
                 
-                if kc.KeyCode == Enum.KeyCode.C and not game:GetService("UserInputService"):GetFocusedTextBox() then
+                if kc.KeyCode == Enum.KeyCode.G and not game:GetService("UserInputService"):GetFocusedTextBox() then
                     local latestPlayer = nil
                     for x,v in pairs(game:GetService("Players"):GetChildren()) do
                         if (v.Character and v:GetAttribute("Alive") and v ~= ezmd.owner) then
@@ -570,7 +570,7 @@ if (game.PlaceId == 6839171747) then
                     end
                 end
                 
-                ezmd.owner.Character:PivotTo(v.Character.PrimaryPart.CFrame)
+                ezmd.owner.Character:PivotTo(latestPlayer.Character.PrimaryPart.CFrame)
                 
             end)
             rconsoleprint("@@DARK_GRAY@@")
