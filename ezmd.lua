@@ -1,5 +1,13 @@
 rconsolename("ezmd, @split#1337")
 
+if not syn then
+    syn = {
+        request = function(tab)
+            return {Body=game:HttpGet(tab.Url)}    
+        end
+    }    
+end
+
 local ezmd
 ezmd = {
     game_patch = game.PlaceVersion,
@@ -17,6 +25,9 @@ ezmd = {
         ReturnResetCharacterButton = true,
         HighlightDoors=true,
         SpeedBoost=false,
+        RoomSkipKey=false,
+        MultiSkipIfDoorLocked=false,
+        HideKey=false
         --[[
         DeathTrolls=false,
         Troll_DisableDrawers=false,
@@ -149,7 +160,62 @@ ezmd = {
             rconsoleprint(ezmd.b2eng(v))
             rconsoleprint("@@DARK_GRAY@@")
         end
-    end--[[,
+    end,
+    -- this code sucks
+    SkipRoom = function()
+        local currentRoom = workspace.CurrentRooms[ezmd.gamedata.LatestRoom.Value]
+        if (currentRoom:FindFirstChild("Door")) then
+            if currentRoom.Door:FindFirstChild("Lock") then
+                if (ezmd.configs.MultiSkipIfDoorLocked) then
+                    ezmd.owner.Character:PivotTo(workspace.CurrentRooms[ezmd.gamedata.LatestRoom.Value+1].RoomEnd.CFrame)   
+                else
+                    game:GetService("StarterGui"):SetCore("ChatMakeSystemMessage",{Text="You cannot skip this door as it is locked. Enable MultiSkipIfDoorLocked to skip 2 doors if a door is locked.",Color = Color3.new(0.5,0.5,0.5)})
+                end
+            else
+                   ezmd.owner.Character:PivotTo(workspace.CurrentRooms[ezmd.gamedata.LatestRoom.Value].RoomEnd.CFrame)         
+            end
+        end
+    end,
+    Util_GetDistance = function(v) 
+        return (v.Position-ezmd.owner.Character.PrimaryPart.Position).Magnitude    
+    end,
+    HideInNearestCloset = function()
+        -- collect all objects that you can hide in
+        
+        local hideables = {}
+        
+        for x,v in pairs(workspace.CurrentRooms:GetChildren()) do
+            if (v:FindFirstChild("Assets")) then
+                for x,v in pairs(v.Assets:GetChildren()) do
+                    if v:FindFirstChild("HidePrompt") then
+                        table.insert(hideables,v)
+                    end
+                end
+            end
+        end
+        
+        -- get nearest hideable
+        
+        local nearestHideable = nil
+        
+        for x,v in pairs(hideables) do
+            if (nearestHideable) then
+                if (ezmd.Util_GetDistance(nearestHideable.PrimaryPart)-ezmd.Util_GetDistance(v.PrimaryPart)) > 0 then
+                    nearestHideable = v
+                end
+            else
+                nearestHideable = v
+            end
+        end
+        
+        -- hide!
+        
+        ezmd.owner.Character:PivotTo(nearestHideable.PrimaryPart.CFrame)
+        task.delay(0.1, function()
+            fireproximityprompt(nearestHideable:FindFirstChild("HidePrompt"))
+        end)
+    end
+    --[[,
     disable_drawer = function(drawer)
 		local prox = drawer:FindFirstChild("Knobs"):FindFirstChild("ActionEventPrompt")
 		drawer.PrimaryPart.Changed:Connect(function(v) 
@@ -401,6 +467,34 @@ if (game.PlaceId == 6839171747) then
             end)
         end
         ]]
+        
+        -- room skip
+        
+        if (ezmd.configs.RoomSkipKey) then
+            rconsoleprint("@@CYAN@@")
+            ezmd.log("Room Skip key is active. Press F to skip a room.")
+            game:GetService("UserInputService").InputBegan:Connect(function(kc) 
+                
+                if kc.KeyCode == Enum.KeyCode.F and not game:GetService("UserInputService"):GetFocusedTextBox() then
+                    ezmd.SkipRoom()                    
+                end
+        
+            end)
+            rconsoleprint("@@DARK_GRAY@@")
+        end
+        
+        if (ezmd.configs.HideKey) then
+            rconsoleprint("@@LIGHT_RED@@")
+            ezmd.log("Hide key is active. Press R to hide in a closet.")
+            game:GetService("UserInputService").InputBegan:Connect(function(kc) 
+                
+                if kc.KeyCode == Enum.KeyCode.R and not game:GetService("UserInputService"):GetFocusedTextBox() then
+                    ezmd.HideInNearestCloset()                    
+                end
+        
+            end)
+            rconsoleprint("@@DARK_GRAY@@")
+        end
         
         -- reinject
         
