@@ -431,7 +431,7 @@ if (game.PlaceId == 6839171747) then
                     if (ezmd.configs.SkipRoom100Minigame) then
                         game:GetService("StarterGui"):SetCore("ChatMakeSystemMessage",{Text=ezmd.configs.Room100MinigameSkipImmediately and "Skipping..." or "Skip ready. Interact with the breaker to complete the skip.",Color = Color3.new(1,0.2,0.2)})
                         local hcon
-                        hcon = currrentRoom.ElevatorBreaker.ActivateEventPrompt.Triggered:Connect(function() 
+                        hcon = currentRoom.ElevatorBreaker.ActivateEventPrompt.Triggered:Connect(function() 
                             hcon:Disconnect() 
                             task.delay(0.5,function()
                                 ezmd.bricks.EBF:FireServer()
