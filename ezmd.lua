@@ -25,6 +25,7 @@ ezmd = {
         ReturnResetCharacterButton = true,
         HighlightDoors=true,
         SpeedBoost=false,
+        SubtleSpeedBoost=true,
         RoomSkipKey=false,
         MultiSkipIfDoorLocked=false,
         HideKey=false,
@@ -425,7 +426,7 @@ if (game.PlaceId == 6839171747) then
             end
             if (v == "WalkSpeed" and ezmd.configs.SpeedBoost) then
                 ezmd.justBoosted = true
-                ezmd.owner.Character:WaitForChild("Humanoid").WalkSpeed = ezmd.owner.Character:WaitForChild("Humanoid").WalkSpeed + 8
+                ezmd.owner.Character:WaitForChild("Humanoid").WalkSpeed = ezmd.owner.Character:WaitForChild("Humanoid").WalkSpeed + 8/(ezmd.configs.SubtleSpeedBoost and 2 or 1)
             end
         end)
         
@@ -498,6 +499,12 @@ if (game.PlaceId == 6839171747) then
                 end
         
             end)
+            rconsoleprint("@@DARK_GRAY@@")
+        end
+        
+        if (ezmd.configs.SubtleSpeedBoost) then
+            rconsoleprint("@@LIGHT_YELLOW@@")
+            ezmd.log(ezmd.configs.SpeedBoost and "SubtleSpeedBoost is active - speed will only be boosted by 4ws." or "[WARN!] SubtleSpeedBoost is active, but SpeedBoost is not. No speed boost will be applied.")
             rconsoleprint("@@DARK_GRAY@@")
         end
         
