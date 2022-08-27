@@ -503,7 +503,7 @@ if (game.PlaceId == 6839171747) then
         end
         
         if (ezmd.configs.SubtleSpeedBoost) then
-            rconsoleprint("@@LIGHT_YELLOW@@")
+            rconsoleprint("@@YELLOW@@")
             ezmd.log(ezmd.configs.SpeedBoost and "SubtleSpeedBoost is active - speed will only be boosted by 4ws." or "[WARN!] SubtleSpeedBoost is active, but SpeedBoost is not. No speed boost will be applied.")
             rconsoleprint("@@DARK_GRAY@@")
         end
