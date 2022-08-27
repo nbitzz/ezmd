@@ -430,6 +430,14 @@ if (game.PlaceId == 6839171747) then
                     
                     if (ezmd.configs.SkipRoom100Minigame) then
                         game:GetService("StarterGui"):SetCore("ChatMakeSystemMessage",{Text=ezmd.configs.Room100MinigameSkipImmediately and "Skipping..." or "Skip ready. Interact with the breaker to complete the skip.",Color = Color3.new(1,0.2,0.2)})
+                        
+                        if (ezmd.configs.Room100MinigameSkipImmediately) then
+                            task.delay(0.5,function()
+                                ezmd.bricks.EBF:FireServer()
+                                game:GetService("StarterGui"):SetCore("ChatMakeSystemMessage",{Text="Room 100 minigame skipped.",Color = Color3.new(1,0.2,0.2)})
+                            end)                            
+                        end
+                        
                         local hcon
                         hcon = currentRoom.ElevatorBreaker.ActivateEventPrompt.Triggered:Connect(function() 
                             hcon:Disconnect() 
@@ -438,13 +446,6 @@ if (game.PlaceId == 6839171747) then
                                 game:GetService("StarterGui"):SetCore("ChatMakeSystemMessage",{Text="Room 100 minigame skipped.",Color = Color3.new(1,0.2,0.2)})
                             end)
                         end)
-                        
-                        if (ezmd.configs.Room100MinigameSkipImmediately) then
-                            task.delay(0.5,function()
-                                ezmd.bricks.EBF:FireServer()
-                                game:GetService("StarterGui"):SetCore("ChatMakeSystemMessage",{Text="Room 100 minigame skipped.",Color = Color3.new(1,0.2,0.2)})
-                            end)                            
-                        end
                     end
                 end
                 
