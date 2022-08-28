@@ -29,10 +29,10 @@ ezmd = {
         RoomSkipKey=false,
         MultiSkipIfDoorLocked=false,
         HideKey=false,
-        SkipRoom100Minigame=false,
-        Room100MinigameSkipImmediately=false,
+        SkipRoom100=true,
         RemoveElectricalDoor=true,
         CatchUpKey=true,
+        ShowFigureLocation=true
         --[[
         DeathTrolls=false,
         Troll_DisableDrawers=false,
@@ -50,7 +50,8 @@ ezmd = {
         if (room50) then
             for x,v in pairs(room50.Assets:GetChildren()) do
         		if v:FindFirstChild("LiveHintBook") then
-        			local highlight = Instance.new("Highlight",v.LiveHintBook)
+        			local highlight = Instance.new("Highlight",ezmd.owner.PlayerGui)
+        			highlight.Adornee = v.LiveHintBook
                     highlight.FillColor = Color3.new(0.5,0.5,0.5)
                     table.insert(ezmd.cleanupOnRoomPass,highlight)
         		end
@@ -370,7 +371,7 @@ if (game.PlaceId == 6839171747) then
             ezmd.log("  [!] Screech has been disabled.")
         end
         
-        if ezmd.configs.SkipRoom100Minigame then
+        if ezmd.configs.SkipRoom100 then
             -- TODO: make this ONLY disable the room 100 minigame.
             
             local screech = ezmd.bricks:WaitForChild("EngageMinigame")
@@ -391,10 +392,15 @@ if (game.PlaceId == 6839171747) then
                 v:Disable()
             end
             ezmd.log("  [.] Disabled current connections ("..#conns..")")
-            --[[screech.OnClientEvent:Connect(function() 
-                ezmd.bricks.EBF:FireServer()
+            screech.OnClientEvent:Connect(function() 
+                -- best i could do lol
+                game:GetService("StarterGui"):SetCore("ChatMakeSystemMessage",{Text="Attempting to spam elevator...",Color = Color3.new(1,0.2,0.2)})
+                while true do
+                    ezmd.bricks.EBF:FireServer();
+                    task.wait();
+                end
             end)
-            ezmd.log("  [.] Reconnected event.")]]
+            ezmd.log("  [.] Reconnected event.")
             ezmd.log("  [!] Minigames have been disabled. The Room 100 minigame skip can now be performed.")
         end
         
@@ -410,11 +416,21 @@ if (game.PlaceId == 6839171747) then
                 ezmd.cleanupOnRoomPass = {}
                 
                 ezmd.HighlightLoot()
-                if (v == 50) then
-                    ezmd.LibraryHighlight()    
-                end
                 
                 local currentRoom = workspace.CurrentRooms[ezmd.gamedata.LatestRoom.Value]
+                
+                if (currentRoom:FindFirstChild("FigureSetup") and ezmd.configs.ShowFigureLocation) then
+                    if (currentRoom.FigureSetup:FindFirstChild("FigureRagdoll")) then
+                        local highlight = Instance.new("Highlight",currentRoom.FigureSetup.FigureRagdoll)
+                        highlight.FillColor = Color3.new(0.5,0.5,0.5)
+                        table.insert(ezmd.cleanupOnRoomPass,highlight)                  
+                    end
+                end
+                
+                if (v == 50 and ezmd.configs.ShowBookLocationInLibrary) then
+                    -- can't test rn but it didn't work before, i'm hoping adding a task.delay fixes it. plus it doesn't matter, the first few seconds are just a cutscene anyway
+                    task.delay(4,function() ezmd.LibraryHighlight() end)    
+                end
                 
                 if (v == 100) then
                     if (ezmd.configs.RemoveElectricalDoor) then
@@ -428,23 +444,11 @@ if (game.PlaceId == 6839171747) then
                     
                     -- this is a mess
                     
-                    if (ezmd.configs.SkipRoom100Minigame) then
-                        game:GetService("StarterGui"):SetCore("ChatMakeSystemMessage",{Text=ezmd.configs.Room100MinigameSkipImmediately and "Skipping..." or "Skip ready. Interact with the breaker to complete the skip.",Color = Color3.new(1,0.2,0.2)})
-                        
-                        if (ezmd.configs.Room100MinigameSkipImmediately) then
-                            task.delay(0.5,function()
-                                ezmd.bricks.EBF:FireServer()
-                                game:GetService("StarterGui"):SetCore("ChatMakeSystemMessage",{Text="Room 100 minigame skipped.",Color = Color3.new(1,0.2,0.2)})
-                            end)                            
-                        end
-                        
-                        local hcon
-                        hcon = currentRoom.ElevatorBreaker.ActivateEventPrompt.Triggered:Connect(function() 
-                            hcon:Disconnect() 
-                            task.delay(0.5,function()
-                                ezmd.bricks.EBF:FireServer()
-                                game:GetService("StarterGui"):SetCore("ChatMakeSystemMessage",{Text="Room 100 minigame skipped.",Color = Color3.new(1,0.2,0.2)})
-                            end)
+                    if (ezmd.configs.SkipRoom100) then
+                        game:GetService("StarterGui"):SetCore("ChatMakeSystemMessage",{Text="Beginning skip, please wait. (If you do not see \"Attempting to spam elevator\", go down to the breaker and interact with it.)",Color = Color3.new(1,0.2,0.2)})
+                        ezmd.owner.Character:PivotTo(currentRoom.ElevatorBreaker.PrimaryPart.CFrame)
+                        task.delay(1,function() fireproximityprompt(currentRoom.ElevatorBreaker.ActivateEventPrompt)
+                            task.delay(0.5,function() ezmd.owner.Character:PivotTo(currentRoom.ElevatorCar.Spawns:GetChildren()[1]) end)
                         end)
                     end
                 end
@@ -592,12 +596,6 @@ if (game.PlaceId == 6839171747) then
         if (ezmd.configs.SubtleSpeedBoost) then
             rconsoleprint("@@YELLOW@@")
             ezmd.log(ezmd.configs.SpeedBoost and "SubtleSpeedBoost is active - speed will only be boosted by 4ws." or "[WARN!] SubtleSpeedBoost is active, but SpeedBoost is not. No speed boost will be applied.")
-            rconsoleprint("@@DARK_GRAY@@")
-        end
-        
-        if (ezmd.configs.Room100MinigameSkipImmediately) then
-            rconsoleprint("@@YELLOW@@")
-            ezmd.log(ezmd.configs.SkipRoom100Minigame and "Room 100's minigame will now be solved as soon as you enter the room." or "[WARN!] Room100MinigameSkipImmediately is active, but SkipRoom100Minigame is not. The minigame will not be skipped.")
             rconsoleprint("@@DARK_GRAY@@")
         end
         
