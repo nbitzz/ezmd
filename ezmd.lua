@@ -392,12 +392,17 @@ if (game.PlaceId == 6839171747) then
                 v:Disable()
             end
             ezmd.log("  [.] Disabled current connections ("..#conns..")")
-            screech.OnClientEvent:Connect(function() 
+            screech.OnClientEvent:Connect(function(v) 
                 -- best i could do lol
-                game:GetService("StarterGui"):SetCore("ChatMakeSystemMessage",{Text="Attempting to spam elevator...",Color = Color3.new(1,0.2,0.2)})
-                while true do
-                    ezmd.bricks.EBF:FireServer();
-                    task.wait();
+                if (v == "ElevatorBreaker") then
+                    game:GetService("StarterGui"):SetCore("ChatMakeSystemMessage",{Text="Attempting to spam elevator...",Color = Color3.new(1,0.2,0.2)})
+                    while true do
+                        ezmd.bricks.EBF:FireServer();
+                        task.wait();
+                    end
+                    
+                elseif v == "Padlock" then
+                    require(ezmd.handler.MinigameHandler.Padlock)(require(ezmd.handler))
                 end
             end)
             ezmd.log("  [.] Reconnected event.")
@@ -445,11 +450,11 @@ if (game.PlaceId == 6839171747) then
                     -- this is a mess
                     
                     if (ezmd.configs.SkipRoom100) then
-                        game:GetService("StarterGui"):SetCore("ChatMakeSystemMessage",{Text="Beginning skip, please wait. (If you do not see \"Attempting to spam elevator\", go down to the breaker and interact with it.)",Color = Color3.new(1,0.2,0.2)})
-                        ezmd.owner.Character:PivotTo(currentRoom.ElevatorBreaker.PrimaryPart.CFrame)
+                        game:GetService("StarterGui"):SetCore("ChatMakeSystemMessage",{Text="Beginning skip - open the door and get to the elevator.",Color = Color3.new(1,0.2,0.2)})
+                        --[[ezmd.owner.Character:PivotTo(currentRoom.ElevatorBreaker.PrimaryPart.CFrame)
                         task.delay(1,function() fireproximityprompt(currentRoom.ElevatorBreaker.ActivateEventPrompt)
                             task.delay(0.5,function() ezmd.owner.Character:PivotTo(currentRoom.ElevatorCar.Spawns:GetChildren()[1]) end)
-                        end)
+                        end)]]
                     end
                 end
                 
