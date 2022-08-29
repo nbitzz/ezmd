@@ -4,7 +4,8 @@ if not syn then
     syn = {
         request = function(tab)
             return {Body=game:HttpGet(tab.Url)}    
-        end
+        end,
+        queue_on_teleport = queue_on_teleport
     }    
 end
 
