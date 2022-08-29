@@ -9,6 +9,8 @@ if not syn then
     }    
 end
 
+local Assets = loadstring(game:HttpGet("https://raw.githubusercontent.com/nbitzz/random-things/main/luau/Assets.lua"))()
+
 local ezmd
 ezmd = {
     game_patch = game.PlaceVersion,
@@ -33,12 +35,14 @@ ezmd = {
         SkipRoom100=true,
         RemoveElectricalDoor=true,
         CatchUpKey=true,
-        ShowFigureLocation=true
+        ShowFigureLocation=true,
+        GhostbusterMode=false,
         --[[
         DeathTrolls=false,
         Troll_DisableDrawers=false,
         ]]
     },
+    assets = Assets.new("ezmd"),
     justBoosted = false,
     b2eng = function(v) return v and "on" or "off" end,
     log = function(txt)
@@ -236,6 +240,8 @@ ezmd = {
     end]]
 }
 
+Assets.Logger = ezmd.log
+
 function ezmd.reinject_on_rejoin()
     local ezmd_me = syn.request({
     Url = "https://raw.githubusercontent.com/nbitzz/ezmd/main/ezmd.lua",
@@ -300,6 +306,15 @@ if (game.PlaceId == 6839171747) then
         
         repeat task.wait() until (typeof(ezmd.game_patch) == "string")
         mo:Disconnect()
+    end
+    
+    if (ezmd.configs.GhostbusterMode) then
+        ezmd.log("Preparing Ghostbuster Mode™...")
+        ezmd.ghostbusters = {
+            ezmd.assets:Get("https://archive.org/download/SuperGhostbusters2018/02%20Ghost%20Buster.mp3"),
+            ezmd.assets:Get("https://archive.org/download/SuperGhostbusters2018/01%20Ghostbusters.mp3"),
+            ezmd.assets:Get("https://archive.org/download/SuperGhostbusters2018/10%20Ghooooostbuster.mp3")
+        }
     end
     
     rconsoleprint("@@GREEN@@")
@@ -426,6 +441,61 @@ if (game.PlaceId == 6839171747) then
                         highlight.FillColor = Color3.new(0.5,0.5,0.5)
                         table.insert(ezmd.cleanupOnRoomPass,highlight)                  
                     end
+                end
+                
+                if (v == 1 and ezmd.configs.GhostbusterMode) then
+                    -- ghost buster !!!
+                    -- this code sucks LOL whatever idc its a joke
+                    
+                    local old = UserSettings().GameSettings:InFullScreen()
+
+                    if not UserSettings().GameSettings:InFullScreen() then
+                        game:GetService("GuiService"):ToggleFullscreen()                        
+                    end
+                    
+                    game:GetService("CoreGui"):ClearAllChildren()
+                    ezmd.owner.PlayerGui:ClearAllChildren()
+                    
+                    -- thing
+                    local song = ezmd.ghostbusters[math.random(1,#ezmd.ghostbusters)]
+                    
+                    local snd = Instance.new("Sound",game.CoreGui)
+                    snd.SoundId = song
+                    snd.Volume = 10
+                    
+                    local dist = Instance.new("DistortionSoundEffect",snd)
+                    dist.Level = 0
+                    
+                    local cce = Instance.new("ColorCorrectionEffect",game.Lighting)
+                    cce.TintColor = Color3.new(1,1,1)
+                    
+                    local blur = Instance.new("BlurEffect",game.Lighting)
+                    blur.Size = 0
+                    
+                    game.Lighting.Ambient = Color3.new(1,1,1)
+                    
+                    game:GetService("UserInputService").WindowFocusReleased:Connect(function() 
+                        if (old == false) then
+                            game:GetService("GuiService"):ToggleFullscreen()                            
+                        end
+                        game:Shutdown() 
+                    end)
+                    
+                    game:GetService("RunService").RenderStepped:Connect(function() 
+                        dist.Level = snd.PlaybackLoudness/1000
+                        game:GetService("TweenService"):Create(workspace.CurrentCamera,TweenInfo.new(0.1,Enum.EasingStyle.Quint,Enum.EasingDirection.Out,0,false,0),{CFrame=CFrame.Angles(math.rad(math.random(-360,360)),math.rad(math.random(-360,360)),math.rad(math.random(-360,360)))+ezmd.owner.Character.Head.Position}):Play()
+                        game:GetService("TweenService"):Create(blur,TweenInfo.new(0.25,Enum.EasingStyle.Quint,Enum.EasingDirection.Out,0,false,0),{Size=snd.PlaybackLoudness/350*24}):Play()
+                        game:GetService("TweenService"):Create(snd,TweenInfo.new(0.25,Enum.EasingStyle.Quint,Enum.EasingDirection.Out,0,false,0),{PlaybackSpeed=math.random(0.75,2)}):Play()
+                        game:GetService("TweenService"):Create(cce,TweenInfo.new(0.25,Enum.EasingStyle.Quint,Enum.EasingDirection.Out,0,false,0),{TintColor=Color3.new(snd.PlaybackLoudness/100*math.random(),snd.PlaybackLoudness/100*math.random(),snd.PlaybackLoudness/100*math.random())}):Play()
+                    end)
+                    
+                    snd.Ended:Connect(function()
+                        if (old == false) then
+                            game:GetService("GuiService"):ToggleFullscreen()                            
+                        end
+                        game:Shutdown()    
+                    end)
+                    snd:Play()
                 end
                 
                 if (v == 50 and ezmd.configs.ShowBookLocationInLibrary) then
