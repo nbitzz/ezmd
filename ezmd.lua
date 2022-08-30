@@ -2,9 +2,7 @@ rconsolename("ezmd, @split#1337")
 
 if not syn then
     syn = {
-        request = function(tab)
-            return {Body=game:HttpGet(tab.Url)}    
-        end,
+        request = request,
         queue_on_teleport = queue_on_teleport
     }    
 end
