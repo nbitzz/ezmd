@@ -34,7 +34,8 @@ ezmd = {
         RemoveElectricalDoor=true,
         CatchUpKey=true,
         ShowFigureLocation=true,
-        GhostbusterMode=false,
+        AutoHideOnRush=true,
+        TpOutOfMapOnAmbush=false
         --[[
         DeathTrolls=false,
         Troll_DisableDrawers=false,
@@ -208,12 +209,18 @@ ezmd = {
         local nearestHideable = nil
         
         for x,v in pairs(hideables) do
-            if (nearestHideable) then
-                if (ezmd.Util_GetDistance(nearestHideable.PrimaryPart)-ezmd.Util_GetDistance(v.PrimaryPart)) > 0 then
+            local canHideInCloset = false
+            if (v:FindFirstChild("HiddenPlayer")) then
+                canHideInCloset = v.HiddenPlayer.Value == nil
+            end
+            if canHideInCloset then
+                if (nearestHideable) then
+                    if (ezmd.Util_GetDistance(nearestHideable.PrimaryPart)-ezmd.Util_GetDistance(v.PrimaryPart)) > 0 then
+                        nearestHideable = v
+                    end
+                else
                     nearestHideable = v
                 end
-            else
-                nearestHideable = v
             end
         end
         
@@ -223,6 +230,22 @@ ezmd = {
         task.delay(0.15, function()
             fireproximityprompt(nearestHideable:FindFirstChild("HidePrompt"))
         end)
+    end,
+    CatchUp = function() 
+        local latestPlayer = nil
+        for x,v in pairs(game:GetService("Players"):GetChildren()) do
+            if (v.Character and v:GetAttribute("Alive") and v ~= ezmd.owner) then
+                if (latestPlayer) then
+                    if (v:GetAttribute("CurrentRoom") > latestPlayer:GetAttribute("CurrentRoom")) then
+                        latestPlayer = v                                    
+                    end
+                else
+                    latestPlayer = v
+                end
+            end
+        end
+    
+        ezmd.owner.Character:PivotTo(latestPlayer.Character.PrimaryPart.CFrame)    
     end
     --[[,
     disable_drawer = function(drawer)
@@ -313,6 +336,76 @@ if (game.PlaceId == 6839171747) then
             ezmd.assets:Get("https://archive.org/download/SuperGhostbusters2018/01%20Ghostbusters.mp3"),
             ezmd.assets:Get("https://archive.org/download/SuperGhostbusters2018/10%20Ghooooostbuster.mp3")
         }
+    end
+    
+    ezmd.HornyAssets = Assets.new("ezmd_horny_mode")
+    
+    if (ezmd.configs.Gay) then
+        ezmd.log("Preparing Gay mode...")
+        ezmd.prem_g = {
+            liquid = Instance.new("Texture")
+        }
+        ezmd.prem_g.liquid.Texture = "rbxassetid://10120358857"
+        ezmd.prem_g.liquid.Transparency = 0.65
+        ezmd.prem_g.StudsPerTileU = 6
+        ezmd.prem_g.StudsPerTileV = 6
+        
+        -- pink vignette
+        
+        local ggui = Instance.new("ScreenGui",ezmd.owner.PlayerGui)
+        ggui.IgnoreGuiInset = true
+        ggui.ResetOnSpawn = false
+        local img = Instance.new("ImageLabel",ggui)
+        img.BorderSizePixel = 0
+        img.BackgroundTransparency = 0.95
+        img.BackgroundColor3 = Color3.fromRGB(255, 0, 234)
+        img.ImageColor3 = Color3.fromRGB(255, 74, 246)
+        img.ImageTransparency = 0.5
+        img.Image = "http://www.roblox.com/asset/?id=5945121255"
+        img.ScaleType = Enum.ScaleType.Slice
+        img.SliceScale = 1
+        img.SliceCenter = Rect.new(213, 156, 811, 420)
+        img.Size = UDim2.new(1,0,1,0)
+        local steam = Instance.new("ImageLabel",img)
+        steam.BackgroundTransparency = 1
+        steam.ImageTransparency = 1
+        steam.ImageColor3 = Color3.fromRGB(255, 175, 255)
+        steam.Image = "rbxassetid://1077212019"
+        steam.ScaleType = Enum.ScaleType.Crop
+        steam.Size = UDim2.new(1,0,1,0)
+        
+        ezmd.flashSteam = function() 
+            steam.ImageTransparency = 0.5
+            game:GetService("TweenService"):Create(steam,TweenInfo.new(math.random(200,300)/100,Enum.EasingStyle.Exponential,Enum.EasingDirection.Out,0,false,0),{ImageTransparency=1}):Play()
+        end
+        
+        ezmd.gay = {
+            DoorKissVideo = ezmd.assets:Get("https://cdn.discordapp.com/attachments/985317502076739586/1019450225938665493/doorkiss.webm"),
+            CatboyFigurexSeek = ezmd.assets:Get("https://media.discordapp.net/attachments/985317502076739586/1019452081406480435/unknown.png")
+        }
+        if (ezmd.configs.Horny) then
+            ezmd.log("!! HORNY MODE ACTIVE !!")
+            ezmd.log("WARNING: NSFW - Disable Horny mode and rejoin the game to delete all images linked to Horny mode.")
+            ezmd.horny = {}
+            
+            if (ezmd.HornyAssets.length > 0) then
+                for x,v in pairs(ezmd.HornyAssets.AssetList) do
+                    table.insert(ezmd.horny,Assets.getAsset(v))                    
+                end
+            else
+                local url = string.format("https://api.rule34.xxx/index.php?page=dapi&s=post&q=index&tags=%s&limit=75&json=1",game:GetService("HttpService"):UrlEncode("doors_(roblox)"))
+        		local images = game:GetService("HttpService"):JSONDecode(game:GetService("HttpService"):GetAsync(url))
+        		for x,v in pairs(images) do
+                    table.insert(ezmd.horny,ezmd.HornyAssets:Get(v.file_url))        		    
+        		end
+            end
+        else
+            ezmd.horny = {ezmd.gay.CatboyFigurexSeek}    
+        end
+    end
+    
+    if (not ezmd.configs.Horny and ezmd.HornyAssets.length > 0) then
+        ezmd.HornyAssets:wipe()
     end
     
     rconsoleprint("@@GREEN@@")
@@ -433,12 +526,64 @@ if (game.PlaceId == 6839171747) then
                 
                 local currentRoom = workspace.CurrentRooms[ezmd.gamedata.LatestRoom.Value]
                 
+                if (ezmd.configs.Gay) then
+                    ezmd.flashSteam()
+                    if (math.random(1,8) == 8) then
+                        for x,v in pairs(currentRoom:GetDescendants()) do
+                            if (v:IsA("BasePart")) then
+                                for _,a in pairs(Enum.NormalId:GetEnumItems()) do
+                                    local liq = ezmd.prem_g.liquid:Clone()
+                                    liq.Parent = v
+                                    liq.Face = a
+                                    table.insert(ezmd.cleanupOnRoomPass,liq)
+                                end
+                            end
+                            
+                            if v:IsA("MeshPart") then
+                                v,TextureId = ezmd.prem_g.liquid.Texture                                
+                            end
+                        end
+                    end
+                    if (currentRoom:FindFirstChild("Assets")) then
+                        for x,v in pairs(currentRoom.Assets:GetChildren()) do
+                            if (v.Name:match("Painting_")) then
+                                if (v:FindFirstChild("Canvas")) then
+                                    if (v.Canvas:FindFirstChild("SurfaceGui")) then
+                                        if (v.Canvas.SurfaceGui:FindFirstChild("ImageLabel")) then
+                                            v.Canvas.SurfaceGui.ImageLabel.Image = ezmd.horny[math.random(1,#ezmd.horny)]                                 
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+                
                 if (currentRoom:FindFirstChild("FigureSetup") and ezmd.configs.ShowFigureLocation) then
                     if (currentRoom.FigureSetup:FindFirstChild("FigureRagdoll")) then
                         local highlight = Instance.new("Highlight",currentRoom.FigureSetup.FigureRagdoll)
                         highlight.FillColor = Color3.new(0.5,0.5,0.5)
                         table.insert(ezmd.cleanupOnRoomPass,highlight)                  
                     end
+                    -- doesn't work and I don't know why.
+                    --[[
+                    if (ezmd.configs.Gay) then
+                        local g = Instance.new("ScreenGui",ezmd.owner.PlayerGui)
+                        g.IgnoreGuiInset = true
+                        g.ResetOnSpawn = false
+                        local w = Instance.new("VideoFrame",g)
+                        w.BackgroundTransparency = 1
+                        w.Size = UDim2.new(1,0,1,0)
+                        w.Video = ezmd.gay.DoorKissVideo
+                        w.ZIndex = 1000
+                        w.Looped = true
+                        w.Volume = 0
+                        w.Playing = true
+                        local con
+                        con = game:GetService("RunService").RenderStepped:Connect(function() if not g then con:Disconnect() return end w.Visible = not w.Visible end)
+                        table.insert(ezmd.cleanupOnRoomPass,g)
+                    end
+                    ]]
                 end
                 
                 if (v == 1 and ezmd.configs.GhostbusterMode) then
@@ -562,6 +707,23 @@ if (game.PlaceId == 6839171747) then
             end
         end)
         
+        workspace.ChildAdded:Connect(function(v) 
+            if (v.Name == "RushMoving" and ezmd.configs.AutoHideOnRush) then
+                game:GetService("StarterGui"):SetCore("ChatMakeSystemMessage",{Text="Rush detected. Auto Hide will be activated once Rush is in range.",Color = Color3.new(0.5,0.5,0.5)})
+                v:WaitForChild("RushNew")
+                repeat task.wait();--[[ ezmd.log(ezmd.Util_GetDistance(v.RushNew))]] until ezmd.Util_GetDistance(v.RushNew) <= 75
+                ezmd.HideInNearestCloset()
+            end
+            if (v.Name == "AmbushMoving" and ezmd.configs.TpOutOfMapOnAmbush) then
+                game:GetService("StarterGui"):SetCore("ChatMakeSystemMessage",{Text="Ambush detected. You have been teleported out of the map. You will be teleported to the nearest player after Ambush is finished.",Color = Color3.new(0.5,0.5,0.5)})
+                ezmd.owner.Character:PivotTo(ezmd.owner.Character.PrimaryPart.CFrame+Vector3.new(0,100,0))
+                ezmd.owner.Character.PrimaryPart.Anchored = true
+                repeat task.wait() until not v
+                ezmd.owner.Character.PrimaryPart.Anchored = false
+                ezmd.CatchUp()
+            end
+        end)
+        
         --[[
         if (ezmd.configs.DeathTrolls) then
             ezmd.log("Warning: DeathTrolls is enabled - revives are no longer available")
@@ -640,21 +802,7 @@ if (game.PlaceId == 6839171747) then
             game:GetService("UserInputService").InputBegan:Connect(function(kc) 
                 
                 if kc.KeyCode == Enum.KeyCode.G and not game:GetService("UserInputService"):GetFocusedTextBox() then
-                    local latestPlayer = nil
-                    for x,v in pairs(game:GetService("Players"):GetChildren()) do
-                        if (v.Character and v:GetAttribute("Alive") and v ~= ezmd.owner) then
-                            if (latestPlayer) then
-                                if (v:GetAttribute("CurrentRoom") > latestPlayer:GetAttribute("CurrentRoom")) then
-                                    latestPlayer = v                                    
-                                end
-                            else
-                                latestPlayer = v
-                            end
-                        end
-                    end
-    
-                    ezmd.owner.Character:PivotTo(latestPlayer.Character.PrimaryPart.CFrame)
-
+                    ezmd.CatchUp()
                 end
                 
             end)
@@ -682,6 +830,23 @@ else
     ezmd.log("--------------------------------")
     rconsoleprint("@@DARK_GRAY@@")
     ezmd.log("Press Enter to change settings.")
+    
+    -- secrets, i don't care about this code much lol this is mostly just for fun
+    
+    local keys = {}
+    for x,v in pairs(ezmd.configs) do
+        table.insert(keys,x)        
+    end
+    
+    if (isfile("ghostbuster.mp3") and not table.find(keys,"GhostbusterMode")) then ezmd.log("Ghostbuster Mode unlocked!");v = "GhostbusterMode"; ezmd.configs[v] = not ezmd.configs[v]; ezmd.log(v.." is now "..ezmd.b2eng(ezmd.configs[v])); writefile("ezmd_cfg.json",ezmd.encode(ezmd.configs)); delfile("ghostbuster.mp3") end
+    if (isfile("closeted.txt")) then
+        if (not table.find(keys,"Yassify")) then ezmd.log("Yassify unlocked!");v = "Yassify"; ezmd.configs[v] = not ezmd.configs[v]; ezmd.log(v.." is now "..ezmd.b2eng(ezmd.configs[v])); writefile("ezmd_cfg.json",ezmd.encode(ezmd.configs)); end
+        if (not table.find(keys,"Gay")) then ezmd.log("Gay mode unlocked!");v = "Gay"; ezmd.configs[v] = not ezmd.configs[v]; ezmd.log(v.." is now "..ezmd.b2eng(ezmd.configs[v])); writefile("ezmd_cfg.json",ezmd.encode(ezmd.configs)); end
+        -- the username check here is only to f**k with my friend, remind me to remove this if you're seeing this kthxbye
+        if (not table.find(keys,"Horny")) then ezmd.log("Horny mode unlocked!");v = "Horny"; ezmd.configs[v] = ezmd.owner.Name == "VelosDayAtDisneyland"; ezmd.log(v.." is now "..ezmd.b2eng(ezmd.configs[v])); writefile("ezmd_cfg.json",ezmd.encode(ezmd.configs)); end
+        delfile("closeted.txt")
+    end
+    
     rconsoleinput()
     while true do
         ezmd.title()
