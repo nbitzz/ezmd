@@ -347,8 +347,8 @@ if (game.PlaceId == 6839171747) then
         }
         ezmd.prem_g.liquid.Texture = "rbxassetid://6583619332"
         ezmd.prem_g.liquid.Transparency = 0.65
-        ezmd.prem_g.liquid.StudsPerTileU = 6
-        ezmd.prem_g.liquid.StudsPerTileV = 6
+        ezmd.prem_g.liquid.StudsPerTileU = 10
+        ezmd.prem_g.liquid.StudsPerTileV = 10
         
         -- pink vignette
         
