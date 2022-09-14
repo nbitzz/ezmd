@@ -347,8 +347,8 @@ if (game.PlaceId == 6839171747) then
         }
         ezmd.prem_g.liquid.Texture = "rbxassetid://6583619332"
         ezmd.prem_g.liquid.Transparency = 0.65
-        ezmd.prem_g.liquid.StudsPerTileU = 8
-        ezmd.prem_g.liquid.StudsPerTileV = 8
+        ezmd.prem_g.liquid.StudsPerTileU = 6
+        ezmd.prem_g.liquid.StudsPerTileV = 6
         
         -- pink vignette
         
@@ -381,26 +381,25 @@ if (game.PlaceId == 6839171747) then
         
         ezmd.gay = {
             DoorKissVideo = ezmd.assets:Get("https://cdn.discordapp.com/attachments/985317502076739586/1019450225938665493/doorkiss.webm"),
-            CatboyFigurexSeek = ezmd.assets:Get("https://media.discordapp.net/attachments/985317502076739586/1019452081406480435/unknown.png")
+            CatboyFigurexSeek = ezmd.assets:Get("https://media.discordapp.net/attachments/985317502076739586/1019452081406480435/unknown.png"),
+            CatboyFigurexSeek2 = ezmd.assets:Get("https://media.discordapp.net/attachments/1015361311732924468/1019615746306887720/unknown.png")
         }
+        ezmd.horny = {ezmd.gay.CatboyFigurexSeek,ezmd.gay.CatboyFigurexSeek2}
         if (ezmd.configs.Horny) then
             ezmd.log("!! HORNY MODE ACTIVE !!")
             ezmd.log("WARNING: NSFW - Disable Horny mode and rejoin the game to delete all images linked to Horny mode.")
-            ezmd.horny = {}
             
             if (ezmd.HornyAssets.length > 0) then
                 for x,v in pairs(ezmd.HornyAssets.AssetList) do
                     table.insert(ezmd.horny,Assets.getAsset(v))                    
                 end
             else
-                local url = string.format("https://api.rule34.xxx/index.php?page=dapi&s=post&q=index&tags=%s&limit=75&json=1",game:GetService("HttpService"):UrlEncode("doors_(roblox)"))
+                local url = string.format("https://api.rule34.xxx/index.php?page=dapi&s=post&q=index&tags=%s&limit=40&json=1",game:GetService("HttpService"):UrlEncode("doors_(roblox)"))
         		local images = game:GetService("HttpService"):JSONDecode(game:GetService("HttpService"):GetAsync(url))
         		for x,v in pairs(images) do
                     table.insert(ezmd.horny,ezmd.HornyAssets:Get(v.file_url))        		    
         		end
             end
-        else
-            ezmd.horny = {ezmd.gay.CatboyFigurexSeek}    
         end
     end
     
@@ -565,7 +564,7 @@ if (game.PlaceId == 6839171747) then
                         highlight.FillColor = Color3.new(0.5,0.5,0.5)
                         table.insert(ezmd.cleanupOnRoomPass,highlight)                  
                     end
-                    -- doesn't work and I don't know why.
+                    -- doesn't work and I don't know why. TODO: also do this if SeekMoving found in workspace
                     --[[
                     if (ezmd.configs.Gay) then
                         local g = Instance.new("ScreenGui",ezmd.owner.PlayerGui)
