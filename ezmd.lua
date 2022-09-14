@@ -345,10 +345,10 @@ if (game.PlaceId == 6839171747) then
         ezmd.prem_g = {
             liquid = Instance.new("Texture")
         }
-        ezmd.prem_g.liquid.Texture = "rbxassetid://10120358857"
+        ezmd.prem_g.liquid.Texture = "rbxassetid://6583619332"
         ezmd.prem_g.liquid.Transparency = 0.65
-        ezmd.prem_g.StudsPerTileU = 6
-        ezmd.prem_g.StudsPerTileV = 6
+        ezmd.prem_g.liquid.StudsPerTileU = 8
+        ezmd.prem_g.liquid.StudsPerTileV = 8
         
         -- pink vignette
         
