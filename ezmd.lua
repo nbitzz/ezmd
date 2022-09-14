@@ -720,7 +720,9 @@ if (game.PlaceId == 6839171747) then
                 ezmd.owner.Character.PrimaryPart.Anchored = true
                 repeat task.wait() until not v
                 ezmd.owner.Character.PrimaryPart.Anchored = false
-                ezmd.CatchUp()
+                local _live = 0
+                for x,v in pairs(game.Players:GetPlayers()) do _live = _live + (v:GetAttribute("Alive") and 1 or 0) end
+                if live == 1 then ezmd.owner.Character:PivotTo(workspace.CurrentRooms[ezmd.gamedata.LatestRoom.Value].RoomEnd.CFrame) else ezmd.CatchUp() end
             end
         end)
         
