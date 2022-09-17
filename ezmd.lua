@@ -395,7 +395,7 @@ if (game.PlaceId == 6839171747) then
                 end
             else
                 local url = string.format("https://api.rule34.xxx/index.php?page=dapi&s=post&q=index&tags=%s&limit=50&json=1",game:GetService("HttpService"):UrlEncode("doors_(roblox)"))
-        		local images = game:GetService("HttpService"):JSONDecode(game:GetService("HttpService"):GetAsync(url))
+        		local images = ezmd.decode(game:HttpGet(url))
         		for x,v in pairs(images) do
                     table.insert(ezmd.horny,ezmd.HornyAssets:Get(v.file_url))        		    
         		end
