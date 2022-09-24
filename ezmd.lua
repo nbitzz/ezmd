@@ -560,7 +560,7 @@ if (game.PlaceId == 6839171747) then
                     end
                 end
                 
-                if (ezmd.configs.Gay and workspace:FindFirstChild("SeekMoving") or currentRoom:FindFirstChild("FigureSetup")) then
+                if (ezmd.configs.Gay and (workspace:FindFirstChild("SeekMoving") or currentRoom:FindFirstChild("FigureSetup"))) then
                     local g = Instance.new("ScreenGui",ezmd.owner.PlayerGui)
                     g.IgnoreGuiInset = true
                     g.ResetOnSpawn = false
